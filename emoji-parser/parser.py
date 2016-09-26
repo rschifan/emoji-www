@@ -19,7 +19,6 @@ for zwj_sequence in re.sub('[\(\)]', '', CODEPOINTS['Emoji_ZWJ_Neutral'], re.UNI
 ZWJ_SEQUENCE_VARIATIONS = []
 for zwj_variation in re.sub('[\(\)]', '', CODEPOINTS['Emoji_ZWJ_Sequence'], re.UNICODE).split('|'):
         ZWJ_SEQUENCE_VARIATIONS.append(zwj_variation.encode('utf-8').decode('unicode_escape'))
-print(len(ZWJ_SEQUENCE_VARIATIONS))
 
 # Shows the Unicode characters corresponding to the text.
 def show_unicode(text):
