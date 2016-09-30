@@ -87,7 +87,7 @@ def get_skin_tone(emoji):
     skin_modifier = re.search(CODEPOINTS['Emoji_Modifier'], emoji, re.UNICODE)
     if skin_modifier:
         return SKIN_TONES.index(skin_modifier.group(0)) + 1
-    if re.search(CODEPOINTS['Emoji_Modifier_Base'], emoji, re.UNICODE):
+    if re.search(CODEPOINTS['Emoji_Modifier_Base'], emoji, re.UNICODE) and not emoji in ZWJ_SEQUENCE_VARIATIONS:
         return 0
     return -1
 
