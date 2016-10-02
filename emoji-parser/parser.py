@@ -29,7 +29,7 @@ def has_emoji(text):
     return re.search(EMOJI, text, re.UNICODE) != None
 
 # Returns a tab separated sequence of text and emoji sequences, identified by 'T' (for text) or 'E' (for emoji) in the preceding column.
-def split_emoji_sequences(text, version = 'Chinese', canonical = True, shortened = True, max_length = 3):
+def split_emoji_sequences(text, version = 'Chinese', canonical = True, max_length = None):
     if version.capitalize() == 'Chinese':
         text = remove_emoji_whitespaces(text)
     tokenized_text = ''
@@ -41,7 +41,7 @@ def split_emoji_sequences(text, version = 'Chinese', canonical = True, shortened
         emoji_sequence = match.group(0)
         if canonical:
             emoji_sequence = get_canonical_sequence(emoji_sequence)
-        if shortened:
+        if max_length is not None and max_length > 0:
             emoji_sequence = get_short_sequence(emoji_sequence, max_length)
         tokenized_text += 'E\t%s\t' %(emoji_sequence)
         index = span[1]
