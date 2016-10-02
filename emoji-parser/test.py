@@ -9,15 +9,15 @@ try:
             print('TEXT: ' + text + '\t(' + show_unicode(text) + ')')
             if has_emoji(text):
                 text = remove_emoji_whitespaces(text)
-                text = pad_emoji_sequences(text)
-                print('\tNo whitespaces, padded: ' + text)
+                print('\tNo whitespaces: ' + text)
                 sequences = get_emoji_sequences(text)
                 print('\tSEQUENCES:')
                 for sequence in sequences:
                     print('\t\t' + sequence)
                     print('\t\tSequence length: ' + str(get_sequence_length(sequence)))
-                    print('\t\tCanonical sequence: ' + get_canonical_sequence(sequence))
-                    print('\t\tShort sequence: ' + get_short_sequence(sequence))
+                    canonical_sequence = get_canonical_sequence(sequence)
+                    print('\t\tCanonical sequence: ' + canonical_sequence)
+                    print('\t\tShort canonical sequence: ' + get_short_sequence(canonical_sequence))
                     print('\t\tEMOJIS:')
                     for emoji in get_emojis(sequence):
                         print('\t\t\t' + emoji)

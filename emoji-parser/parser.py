@@ -4,7 +4,7 @@ import emoji
 CODEPOINTS = emoji.get_codepoints()
 EMOJI = '(%s(?!%s))|(%s(?=%s))' %(CODEPOINTS['Emoji_Presentation'], CODEPOINTS['Text_Presentation_Selector'], CODEPOINTS['Emoji'], CODEPOINTS['Emoji_Presentation_Selector'])
 EMOJI_CHARS = '%s|%s|%s|%s' %(EMOJI, CODEPOINTS['Emoji_Modifier'], CODEPOINTS['Emoji_ZWJ_Separator'], CODEPOINTS['Emoji_Presentation_Selector'])
-EMOJI_SEQUENCE = '%s|%s|%s|%s|%s' %(CODEPOINTS['Emoji_ZWJ_Sequence'], CODEPOINTS['Emoji_Modifier_Sequence'], CODEPOINTS['Emoji_Flag_Sequence'], CODEPOINTS['Emoji_Combining_Sequence'], EMOJI)
+EMOJI_SEQUENCE = '(%s|%s|%s|%s|%s)%s?' %(CODEPOINTS['Emoji_ZWJ_Sequence'], CODEPOINTS['Emoji_Modifier_Sequence'], CODEPOINTS['Emoji_Flag_Sequence'], CODEPOINTS['Emoji_Combining_Sequence'], EMOJI, CODEPOINTS['Emoji_Presentation_Selector'])
 
 SKIN_TONES = []
 skin_tone = re.search('(?<=\[).+(?=\-)', CODEPOINTS['Emoji_Modifier'], re.UNICODE).group(0).encode('utf-8').decode('unicode_escape')
@@ -28,17 +28,31 @@ def show_unicode(text):
 def has_emoji(text):
     return re.search(EMOJI, text, re.UNICODE) != None
 
+# Returns a tab separated sequence of text and emoji sequences, identified by 'T' (for text) or 'E' (for emoji) in the preceding column.
+def split_emoji_sequences(text, version = 'Chinese', canonical = True, shortened = True, max_length = 3):
+    if version.capitalize() == 'Chinese':
+        text = remove_emoji_whitespaces(text)
+    tokenized_text = ''
+    index = 0
+    for match in re.finditer('(%s)+' %(EMOJI_SEQUENCE), text, re.UNICODE):
+        span = match.span()
+        if index != span[0]:
+            tokenized_text += 'T\t%s\t' %(text[index:span[0]])
+        emoji_sequence = match.group(0)
+        if canonical:
+            emoji_sequence = get_canonical_sequence(emoji_sequence)
+        if shortened:
+            emoji_sequence = get_short_sequence(emoji_sequence, max_length)
+        tokenized_text += 'E\t%s\t' %(emoji_sequence)
+        index = span[1]
+    if index < len(text):
+        tokenized_text += 'T\t%s' %(text[index:])
+    return tokenized_text.strip()
+
 # Returns a copy of the text without whitespaces between emoji sequences.
 def remove_emoji_whitespaces(text):
     regex = '(%s)\s+(?=(%s))' %(EMOJI_SEQUENCE, EMOJI_SEQUENCE)
     return re.sub(regex, '\g<1>', text, 0, re.UNICODE)
-
-# Returns a copy of the text with whitespaces between regular characters and emoji.
-def pad_emoji_sequences(text):
-    regex = '([\d\w])(?=%s)' %(EMOJI)
-    text = re.sub(regex, '\g<1> ', text, 0, re.UNICODE)
-    regex = '(?<=%s)([\d\w])' %(EMOJI)
-    return re.sub(regex, ' \g<1>', text, 0, re.UNICODE)
 
 # Returns all the sequences of emojis with no whitespaces in between contained in the text.
 def get_emoji_sequences(text):
@@ -47,7 +61,7 @@ def get_emoji_sequences(text):
         sequences.append(match.group(0))
     return sequences
 
-# Returns true if the token contains emoji and no other characters.
+# Returns true if the token contains emoji and nothing but emoji.
 def is_emoji_sequence(sequence):
     regex = re.compile('^(%s)+$' %(EMOJI_CHARS), re.UNICODE)
     return regex.match(sequence) != None
