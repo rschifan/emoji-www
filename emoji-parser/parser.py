@@ -14,11 +14,22 @@ while skin_tone <= re.search('(?<=\-).+(?=\])', CODEPOINTS['Emoji_Modifier'], re
 
 HEAVY_BLACK_HEART = u'\u2764'
 NEUTRAL_ZWJ_SEQUENCES = []
-for zwj_sequence in re.sub('[\(\)]', '', CODEPOINTS['Emoji_ZWJ_Neutral'], re.UNICODE).split('|'):
+for zwj_sequence in re.sub('[\(\)]', '', CODEPOINTS['Emoji_ZWJ_Neutral']).split('|'):
     NEUTRAL_ZWJ_SEQUENCES.append(zwj_sequence.encode('utf-8').decode('unicode_escape'))
+print(NEUTRAL_ZWJ_SEQUENCES)
 ZWJ_SEQUENCE_VARIATIONS = []
-for zwj_variation in re.sub('[\(\)]', '', CODEPOINTS['Emoji_ZWJ_Sequence'], re.UNICODE).split('|'):
-        ZWJ_SEQUENCE_VARIATIONS.append(zwj_variation.encode('utf-8').decode('unicode_escape'))
+ZWJ_SEQUENCE_MAPPING = dict()
+for zwj_variation in re.sub('[\(\)]', '', CODEPOINTS['Emoji_ZWJ_Sequence']).split('|'):
+    zwj_variation = zwj_variation.encode('utf-8').decode('unicode_escape')
+    separators = len(re.findall(CODEPOINTS['Emoji_ZWJ_Separator'], zwj_variation, re.UNICODE))
+    if HEAVY_BLACK_HEART in zwj_variation:
+        index = len(re.findall(CODEPOINTS['Emoji_ZWJ_Separator'], zwj_variation, re.UNICODE))
+    elif zwj_variation not in NEUTRAL_ZWJ_SEQUENCES:
+        index = 1
+    else:
+        index = 0
+    ZWJ_SEQUENCE_VARIATIONS.append(zwj_variation)
+    ZWJ_SEQUENCE_MAPPING[zwj_variation] = NEUTRAL_ZWJ_SEQUENCES[index]
 
 # Shows the Unicode characters corresponding to the text.
 def show_unicode(text):
@@ -69,11 +80,8 @@ def is_emoji_sequence(sequence):
 # Returns the neutral "yellow" version of the sequence.
 def get_canonical_sequence(sequence):
     sequence = re.sub(CODEPOINTS['Emoji_Modifier'], '', sequence, 0, re.UNICODE)
-    if re.search(CODEPOINTS['Emoji_ZWJ_Sequence'], sequence, re.UNICODE):
-        separators = len(re.findall(CODEPOINTS['Emoji_ZWJ_Separator'], sequence, re.UNICODE))
-        if HEAVY_BLACK_HEART in sequence:
-            separators += 1
-        sequence = re.sub(CODEPOINTS['Emoji_ZWJ_Sequence'], NEUTRAL_ZWJ_SEQUENCES[separators - 1], sequence, re.UNICODE)
+    for zwj_sequence in ZWJ_SEQUENCE_MAPPING.keys():
+        sequence = re.sub(zwj_sequence, ZWJ_SEQUENCE_MAPPING[zwj_sequence], sequence, re.UNICODE)
     return sequence
 
 # Returns the number of emojis in the sequence, ignoring modifiers.
