@@ -33,5 +33,5 @@ These files are meant to compute the counts.
 Files ``chinese-tokens.tsv`` and ``english-tokens.tsv`` contain the Chinese and English pre-processed captions tokenized as we discussed (i.e., isolating the short canonical emoji sequences in context).
 Schema is: post_id<tab><T/E><tab>text/emoji_sequence<tab><T/E><tab>text/emoji_sequence<tab><T/E><tab>text/emoji_sequence...
 Example: 
-492186542997358343_11986392	T	Pretty sure that's a smile! E	🐾🐺	T	#shibatatum	E	🐕🐾
+``492186542997358343_11986392	T	Pretty sure that's a smile! E	🐾🐺	T	#shibatatum	E	🐕🐾``
 These files are meant to compute the embeddings.
